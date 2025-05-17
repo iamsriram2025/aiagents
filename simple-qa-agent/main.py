@@ -1,15 +1,19 @@
-from agent import SimpleQAAgent
+from agent import CodingAssistant
+
 
 def main():
-    print("Simple Q&A Agent")
-    print("Commands:")
+    print("🤖 Multi-LLM Coding Assistant 🤖")
+    print("This assistant is specialized for programming and coding questions only.")
+    print("\nCommands:")
     print("- 'exit': Quit the application")
     print("- 'clear': Reset conversation history")
     print("- 'model <name>': Change the LLM model (e.g., 'model gpt-4')")
-    print("-" * 50)
+    print("- 'provider <name> [model] [api_key]': Change the LLM provider")
+    print("  Example: provider anthropic claude-3-haiku-20240307 your_api_key_here")
+    print("-" * 70)
 
-    # Initialize the agent with default model
-    agent = SimpleQAAgent()
+    # Initialize the assistant with default provider and model
+    assistant = CodingAssistant()
 
     # Main interaction loop
     while True:
@@ -18,13 +22,13 @@ def main():
 
         # Check for exit command
         if user_input.lower() == "exit":
-            print("Goodbye!")
+            print("Goodbye! Happy coding!")
             break
 
         # Check for clear command
         elif user_input.lower() == "clear":
-            agent.clear_history()
-            print("Conversation history cleared.")
+            result = assistant.clear_history()
+            print(f"\nSystem: {result}")
             continue
 
         # Check for model change command
@@ -33,7 +37,7 @@ def main():
                 # Extract model name
                 new_model = user_input[6:].strip()
                 if new_model:
-                    result = agent.set_model(new_model)
+                    result = assistant.change_model(new_model)
                     print(f"\nSystem: {result}")
                 else:
                     print("\nSystem: Please specify a model name.")
@@ -41,13 +45,31 @@ def main():
                 print(f"\nSystem Error: {str(e)}")
             continue
 
-        # Get response from agent
+        # Check for provider change command
+        elif user_input.lower().startswith("provider "):
+            try:
+                # Parse provider command: provider <name> [model] [api_key]
+                parts = user_input[9:].strip().split()
+                provider_name = parts[0] if parts else ""
+                model_name = parts[1] if len(parts) > 1 else None
+                api_key = parts[2] if len(parts) > 2 else None
+
+                if provider_name:
+                    result = assistant.change_provider(provider_name, model_name, api_key)
+                    print(f"\nSystem: {result}")
+                else:
+                    print("\nSystem: Please specify a provider name.")
+            except Exception as e:
+                print(f"\nSystem Error: {str(e)}")
+            continue
+
+        # Get response from assistant for regular queries
         elif user_input:
             print("\nThinking...")
-            response = agent.get_response(user_input)
+            response = assistant.get_response(user_input)
 
             # Check if response is an error message
-            if response.startswith("Error:") or response.startswith("API Error:") or response.startswith("Unexpected error:"):
+            if response.startswith("Error:"):
                 print(f"\nSystem: {response}")
             else:
                 print(f"\nAssistant: {response}")
