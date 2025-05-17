@@ -1,6 +1,4 @@
 import os
-import re
-import json
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 
@@ -98,6 +96,7 @@ class AnthropicProvider(LLMProvider):
 
     def _convert_messages_to_anthropic_format(self, messages):
         """Convert OpenAI-style messages to Anthropic format"""
+        global system_message
         anthropic_messages = []
 
         for msg in messages:
